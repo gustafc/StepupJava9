@@ -1,0 +1,39 @@
+import java.net.http.WebSocket;
+
+int READ_MSGS = 3;
+java.util.concurrent.CountDownLatch wsClosed = new java.util.concurrent.CountDownLatch(1);
+WebSocket.Listener wsListener = new WebSocket.Listener(){
+    @Override public void onOpen(WebSocket ws){ 
+        printf("Opened websocket, requesting %d messages%n", READ_MSGS); 
+        ws.request(READ_MSGS); 
+    }
+    @Override public void onClose(WebSocket ws, Optional<WebSocket.CloseCode> code, String reason){ 
+        printf("Closed websocket, %s, reason = %s%n", code.map(c -> "code = " + c).orElse("no code"), reason);
+	wsClosed.countDown();
+    }
+    @Override public java.util.concurrent.CompletionStage onText(WebSocket ws, CharSequence cseq, WebSocket.MessagePart part){ 
+        printf("Received %s text: %s%n", part, cseq); 
+        return null; 
+    }
+    @Override public void onError(WebSocket ws, Throwable error){ 
+        printf("Error on websocket: %s%n", error); 
+    }
+}
+
+
+java.util.concurrent.CompletableFuture<WebSocket> sendText(WebSocket ws, String text) {
+    printf("Sending text: %s%n", text);
+    return ws.sendText(text);
+}
+
+WebSocket.newBuilder(URI.create("ws://echo.websocket.org"), wsListener).
+    buildAsync().
+    whenComplete((ok, err) -> printf("Websocket built.%n")).
+    thenCompose(ws -> sendText(ws, "Apelsin")).
+    thenCompose(ws -> sendText(ws, "Banan")).
+    thenCompose(ws -> sendText(ws, "Citron")).
+    thenCompose(ws -> { printf("Sending close%n"); return ws.sendClose(); }).
+    join();
+printf("Finished sending, awaiting close confirmation.%n");
+printf("%s. Bye!%n", wsClosed.await(10_000, java.util.concurrent.TimeUnit.MILLISECONDS) ? "All finished" : "Timed out");
+/exit

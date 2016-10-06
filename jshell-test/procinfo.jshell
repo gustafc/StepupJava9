@@ -1,0 +1,16 @@
+printf("Siblings (and self)%n")
+ProcessHandle.
+	current().
+	parent().
+	stream().
+	flatMap(p -> p.descendants()).
+	forEach(p -> System.out.printf("%d: %s%n", p.getPid(), p.info()))
+
+printf("Siblings (and self)%n")
+ProcessHandle.
+	current().
+	parent().
+	stream().
+	forEach(p -> System.out.printf("%d: %s%n", p.getPid(), p.info()))
+
+/exit

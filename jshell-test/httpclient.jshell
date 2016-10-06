@@ -1,0 +1,16 @@
+#!/usr/bin/env jshell
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+printf("Sending blocking request...");
+String receivedBlocking = HttpRequest.create(URI.create("http://www.mejsla.se/")).GET().response().body(HttpResponse.asString());
+printf(" done!%nTrying async...");
+String receivedAsync = HttpRequest.create(URI.create("http://www.mejsla.se/")).
+       GET().
+       responseAsync().
+       thenCompose(r -> r.bodyAsync(HttpResponse.asString())).
+       get();
+printf(" done!%n");
+printf("Sizes: %d vs %d%n", receivedBlocking.length(), receivedAsync.length());
+/exit

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export JAVA_HOME_9=/Library/Java/JavaVirtualMachines/jdk-9.jdk/Contents/Home
+export JAVA_HOME="${JAVA_HOME_9}"
+export PATH="$JAVA_HOME/bin:$PATH"
